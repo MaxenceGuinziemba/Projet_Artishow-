@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictions - Hospital Simulation Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-hospital"></i> Hospital Simulation Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/analytics/{{ sim_id }}">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+                <a class="nav-link" href="/incidents/{{ sim_id }}">
+                    <i class="fas fa-exclamation-triangle"></i> Incidents
+                </a>
+                <a class="nav-link" href="/realtime/{{ sim_id }}">
+                    <i class="fas fa-play"></i> Real-time
+                </a>
+                <a class="nav-link active" href="#" id="predictionsLink">
+                    <i class="fas fa-brain"></i> Predictions
+                </a>
+                <a class="nav-link" href="/trajectories/{{ sim_id }}" id="trajectoriesLink">
+                    <i class="fas fa-project-diagram"></i> Trajectories
+                </a>
+                <a class="nav-link" href="/">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Header and Controls -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-crystal-ball"></i> Hospital Danger Predictions
+                            <span class="badge bg-info ms-2" id="simulationBadge">Simulation {{ sim_id }}</span>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <p class="mb-0">
+                                    AI-powered predictions for potential hospital dangers across multiple time horizons.
+                                    Models trained on historical simulation data to identify risks before they occur.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-primary" id="refreshPredictions">
+                                    <i class="fas fa-sync-alt"></i> Refresh Predictions
+                                </button>
+                                <button class="btn btn-secondary ms-2" id="trainModels">
+                                    <i class="fas fa-brain"></i> Retrain Models
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Danger Score -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-exclamation-triangle"></i> Overall Hospital Danger Assessment
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="danger-score-container">
+                                    <div class="danger-score-circle" id="overallDangerScore">
+                                        <span class="score-text" id="dangerScoreText">--</span>
+                                    </div>
+                                    <h6 class="mt-2">Overall Risk Level</h6>
+                                    <span class="badge" id="riskLevelBadge">Unknown</span>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div id="currentMetrics" class="current-metrics">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="metric-box">
+                                                <div class="metric-value" id="patientsTotal">--</div>
+                                                <div class="metric-label">Total Patients</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="metric-box">
+                                                <div class="metric-value" id="patientsWaiting">--</div>
+                                                <div class="metric-label">Waiting</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="metric-box">
+                                                <div class="metric-value" id="doctorsUtilization">--%</div>
+                                                <div class="metric-label">Doctor Utilization</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="metric-box">
+                                                <div class="metric-value" id="avgWaitTime">-- min</div>
+                                                <div class="metric-label">Avg Wait Time</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Horizon Predictions -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-clock"></i> Multi-Horizon Danger Predictions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="timeHorizonPredictions">
+                            <!-- Time horizon predictions will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Individual Danger Types -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-users"></i> Patient Overload Risk
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="prediction-item" id="overloadPrediction">
+                            <div class="prediction-probability">
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" id="overloadBar"></div>
+                                </div>
+                                <div class="prediction-details">
+                                    <span class="probability-text" id="overloadProb">--</span>
+                                    <span class="status-badge" id="overloadStatus">Unknown</span>
+                                </div>
+                            </div>
+                            <p class="prediction-description">
+                                Risk of having too many patients relative to available medical staff capacity.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-clock"></i> Long Wait Times Risk
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="prediction-item" id="waitTimePrediction">
+                            <div class="prediction-probability">
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" id="waitTimeBar"></div>
+                                </div>
+                                <div class="prediction-details">
+                                    <span class="probability-text" id="waitTimeProb">--</span>
+                                    <span class="status-badge" id="waitTimeStatus">Unknown</span>
+                                </div>
+                            </div>
+                            <p class="prediction-description">
+                                Risk of patient wait times exceeding acceptable thresholds (>60 minutes).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-user-md"></i> Staffing Shortage Risk
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="prediction-item" id="staffingPrediction">
+                            <div class="prediction-probability">
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" id="staffingBar"></div>
+                                </div>
+                                <div class="prediction-details">
+                                    <span class="probability-text" id="staffingProb">--</span>
+                                    <span class="status-badge" id="staffingStatus">Unknown</span>
+                                </div>
+                            </div>
+                            <p class="prediction-description">
+                                Risk of insufficient medical staff for current patient load and complexity.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-heartbeat"></i> System Stress Risk
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="prediction-item" id="systemStressPrediction">
+                            <div class="prediction-probability">
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" id="systemStressBar"></div>
+                                </div>
+                                <div class="prediction-details">
+                                    <span class="probability-text" id="systemStressProb">--</span>
+                                    <span class="status-badge" id="systemStressStatus">Unknown</span>
+                                </div>
+                            </div>
+                            <p class="prediction-description">
+                                Combined risk assessment considering all hospital operational factors.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Predictive Charts -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line"></i> Predicted Wait Times
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="waitTimePredictionChart"></canvas>
+                        <div class="prediction-details mt-2">
+                            <small class="text-muted">
+                                Predicted average wait time: <span id="predictedWaitTime" class="fw-bold">-- minutes</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-area"></i> Predicted Patient Volume
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="patientCountPredictionChart"></canvas>
+                        <div class="prediction-details mt-2">
+                            <small class="text-muted">
+                                Predicted patient count: <span id="predictedPatientCount" class="fw-bold">-- patients</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Information -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle"></i> Model Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="modelInfo">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Model Status</h6>
+                                    <p class="mb-1">Last Training: <span id="lastTraining">Unknown</span></p>
+                                    <p class="mb-1">Prediction Time: <span id="predictionTime">Unknown</span></p>
+                                    <p class="mb-0">Models Loaded: <span id="modelsLoaded">0</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Prediction Confidence</h6>
+                                    <p class="mb-1">Data Quality: <span id="dataQuality" class="badge bg-secondary">Unknown</span></p>
+                                    <p class="mb-1">Model Accuracy: <span id="modelAccuracy">Unknown</span></p>
+                                    <p class="mb-0">Recommendation: <span id="recommendation">Analyze predictions with caution</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5 id="loadingText">Generating predictions...</h5>
+                    <p class="text-muted mb-0">This may take a few moments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/predictions.js') }}"></script>
+    <script>
+        // Initialize predictions with simulation ID
+        const SIM_ID = {% if sim_id %}{{ sim_id | tojson }}{% else %}null{% endif %};
+        window.addEventListener('DOMContentLoaded', function() {
+            if (SIM_ID) {
+                initializePredictions(SIM_ID);
+            } else {
+                console.error('No simulation ID provided');
+                alert('Error: No simulation ID provided');
+            }
+        });
+    </script>
+</body>
+</html>

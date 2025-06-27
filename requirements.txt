@@ -1,0 +1,22 @@
+# Core dependencies
+flask>=2.3.0
+# chart.js>=4.0.0
+
+# Database
+# sqlite3
+
+# Data processing
+pandas>=1.5.0
+numpy>=1.24.0
+
+# Scientific computing (for ML components)
+scikit-learn>=1.3.0
+joblib>=1.1.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Simulation
+simpy>=4.0.0
+
+# Development
+pytest>=7.0.0

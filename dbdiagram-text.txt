@@ -1,0 +1,117 @@
+
+Table simulations {
+    id integer [pk, increment]
+    start_time text
+    config text
+    num_doctors integer
+    arrival_rate real
+    description text
+}
+
+Table patient_treated {
+    id integer [pk, increment]
+    sim_id integer [ref: > simulations.id]
+    doctor_id integer
+    doctor_specialty text
+    disease text
+    treatment_time integer
+    wait_time integer
+    arrival_time text
+    start_treatment text
+    end_treatment text
+    sim_minutes integer
+    timestamp text
+}
+
+Table hospital_state {
+    id integer [pk, increment]
+    sim_id integer [ref: > simulations.id]
+    patients_total integer
+    patients_treated integer
+    busy_doctors integer
+    waiting_patients integer
+    sim_time text
+    sim_minutes integer
+    timestamp text
+}
+
+Table sim_metadata {
+    id integer [pk, increment]
+    sim_id integer [ref: > simulations.id]
+    start_date text
+    last_sim_time integer
+    patients_total integer
+    patients_treated integer
+    active_doctors text
+    timestamp text
+}
+
+Table simulation_events {
+    id integer [pk, increment]
+    sim_id integer [ref: > simulations.id]
+    event_id text
+    event_type text
+    params text
+    start_time text
+    end_time text
+    start_sim_minutes integer
+    end_sim_minutes integer
+    timestamp text
+}
+
+Table parameter_changes {
+    id integer [pk, increment]
+    sim_id integer [ref: > simulations.id]
+    sim_time text
+    sim_minutes integer
+    old_values text
+    new_values text
+    timestamp text
+}
+
+Table detailed_events {
+    id integer [pk, increment]
+    sim_id integer [ref: > simulations.id]
+    event_type text
+    patient_id text
+    doctor_id integer
+    event_time text
+    sim_minutes integer
+    details text
+    timestamp text
+}
+
+Table predictions {
+    id integer [pk, increment]
+    sim_id integer [ref: > simulations.id]
+    prediction_date text
+    prediction_type text
+    value real
+    confidence real
+    model_name text
+    features text
+    timestamp text
+}
+
+Table trajectories {
+    id integer [pk, increment]
+    base_sim_id integer [ref: > simulations.id]
+    trajectory_id integer
+    trajectory_start_time real
+    trajectory_end_time real
+    parameters text
+    description text
+    timestamp text
+}
+
+Table trajectory_results {
+    id integer [pk, increment]
+    trajectory_id integer [ref: > trajectories.id]
+    sim_time real
+    patients_total integer
+    patients_treated integer
+    busy_doctors integer
+    waiting_patients integer
+    avg_wait_time real
+    timestamp text
+}

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Hospital Simulation Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-hospital"></i> Hospital Simulation Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link active" href="#" id="analyticsLink">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+                <a class="nav-link" href="/incidents/{{ sim_id }}" id="incidentsLink">
+                    <i class="fas fa-exclamation-triangle"></i> Incidents
+                </a>
+                <a class="nav-link" href="/realtime/{{ sim_id }}" id="realtimeLink">
+                    <i class="fas fa-play"></i> Real-time
+                </a>
+                <a class="nav-link" href="/predictions/{{ sim_id }}" id="predictionsLink">
+                    <i class="fas fa-brain"></i> Predictions
+                </a>
+                <a class="nav-link" href="/trajectories/{{ sim_id }}" id="trajectoriesLink">
+                    <i class="fas fa-project-diagram"></i> Trajectories
+                </a>
+                <a class="nav-link" href="/">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Chart Controls -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-sliders-h"></i> Chart Controls
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Time Range</label>
+                                <select class="form-select" id="timeRangeSelect">
+                                    <option value="all">All Time</option>
+                                    <option value="24h">Last 24 Hours</option>
+                                    <option value="7d">Last 7 Days</option>
+                                    <option value="30d">Last 30 Days</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Data Granularity</label>
+                                <select class="form-select" id="granularitySelect">
+                                    <option value="hour" selected>Per Hour</option>
+                                    <option value="minute">Per Minute</option>
+                                    <option value="day">Per Day</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Doctor Specialty Filter</label>
+                                <select class="form-select" id="specialtySelect">
+                                    <option value="all">All Specialties</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Analytics Charts -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line"></i> Patients Over Time
+                            <div class="float-end">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showTotal" checked>
+                                    <label class="form-check-label" for="showTotal">Total</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showTreated" checked>
+                                    <label class="form-check-label" for="showTreated">Treated</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showWaiting" checked>
+                                    <label class="form-check-label" for="showWaiting">Waiting</label>
+                                </div>
+                            </div>
+                        </h5>
+                    </div>
+                    <div class="card-body" style="height: 400px;">
+                        <canvas id="patientsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-user-md"></i> Doctor Utilization
+                        </h5>
+                    </div>
+                    <div class="card-body" style="height: 400px;">
+                        <canvas id="doctorsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-clock"></i> Hourly Treatment Patterns
+                        </h5>
+                    </div>
+                    <div class="card-body" style="height: 400px;">
+                        <canvas id="hourlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-stethoscope"></i> Disease Distribution
+                        </h5>
+                    </div>
+                    <div class="card-body" style="height: 400px;">
+                        <canvas id="diseaseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calendar-alt"></i> Daily Performance Metrics
+                        </h5>
+                    </div>
+                    <div class="card-body" style="height: 500px;">
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-trophy"></i> Doctor Performance
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="doctorPerformanceTable">
+                                <thead>
+                                    <tr>
+                                        <th>Doctor ID</th>
+                                        <th>Specialty</th>
+                                        <th>Patients Treated</th>
+                                        <th>Avg Treatment Time</th>
+                                        <th>Avg Wait Time</th>
+                                        <th>Efficiency Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="doctorPerformanceBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+    <script>
+        // Initialize analytics with simulation ID
+        // Note: sim_id is a Jinja2 template variable rendered by Flask
+        const SIM_ID = {% if sim_id %}{{ sim_id | tojson }}{% else %}null{% endif %};
+        if (SIM_ID === null) {
+            console.error('No simulation ID provided');
+            alert('Error: No simulation ID provided');
+        } else {
+            window.addEventListener('DOMContentLoaded', function() {
+                initializeAnalytics(SIM_ID);
+            });
+        }
+    </script>
+</body>
+</html>
