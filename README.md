@@ -3,12 +3,6 @@
 > ARTISHOW - Telecom Paris
 > Maxence GUINZIEMBA-PROKOP, Arsène MALLET, Carl MONNAERT, Lukas TABOURI
 
----
-
-> [!CAUTION]
-> Le projet est désormais finalisé
-> Pour suivre l'avancement chronologique de notre projet, voir le [planning](./PLANNING.md)
-
 Un système complet de simulation hospitalière intégrant une simulation par événements discrets, une surveillance en temps réel, des prédictions par apprentissage automatique et des dashboards interactifs.
 
 ## Fonctionnalités
