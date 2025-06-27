@@ -5,6 +5,10 @@
 
 Un système complet de simulation hospitalière intégrant une simulation par événements discrets, une surveillance en temps réel, des prédictions par apprentissage automatique et des dashboards interactifs.
 
+## Projet Artishow 
+
+     Notre projet développe un tableau de bord interactif pour suivre en temps réel l'activité hospitalière : arrivées de patients, pathologies et disponibilité des médecins. En utilisant l'IA, le système détermine les périodes où l'hôpital risque d'être saturé. Ainsi, l'outil aide les gestionnaires à mieux organiser les ressources, anticiper les moments de forte affluence et optimiser la prise en charge des patients en s'appuyant sur les données réelles de l'hôpital.
+
 ## Fonctionnalités
 
 ### Simulation principale
